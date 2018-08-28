@@ -40,7 +40,7 @@ class ClassifierTrainer(Trainer):
     def __init__(self, *args, sampling_model=None, use_cuda=True, **kwargs):
         self.sampling_model = sampling_model
         super(ClassifierTrainer, self).__init__(*args, use_cuda=use_cuda, **kwargs)
-        self.train_set, self.test_set = self.train_test(self.model, self.gene_dataset)
+        self.train_set, self.test_set = self.train_test(self.model, self.gene_dataset, type_class=AnnotationPosterior)
         if sampling_model is not None:
             self.train_set.sampling_model = sampling_model
             self.test_set.sampling_model = sampling_model
@@ -96,9 +96,9 @@ class SemiSupervisedTrainer(UnsupervisedTrainer):
             sampling_model=self.model
         )
 
-        self.full_dataset = self.create_posterior(shuffle=True)
-        self.labelled_set = self.create_posterior(indices=indices_labelled)
-        self.unlabelled_set = self.create_posterior(indices=indices_unlabelled)
+        self.full_dataset = self.create_posterior(shuffle=True, type_class=AnnotationPosterior)
+        self.labelled_set = self.create_posterior(indices=indices_labelled, type_class=AnnotationPosterior)
+        self.unlabelled_set = self.create_posterior(indices=indices_unlabelled, type_class=AnnotationPosterior)
 
         self.classifier_trainer.train_set = self.labelled_set
 

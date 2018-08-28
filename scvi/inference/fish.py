@@ -47,7 +47,7 @@ class TrainerFish(Trainer):
 
     def __init__(self, model, gene_dataset_seq, gene_dataset_fish, train_size=0.8, test_size=None,
                  use_cuda=True, cl_ratio=0, n_epochs_even=1, n_epochs_kl=2000, n_epochs_cl=1, seed=0, warm_up=10,
-                 **kwargs):
+                 scale=50, **kwargs):
         super(TrainerFish, self).__init__(model, gene_dataset_seq, use_cuda=use_cuda, **kwargs)
         self.kl = None
         self.cl_ratio = cl_ratio
@@ -58,22 +58,23 @@ class TrainerFish(Trainer):
         self.kl_weight = 0
         self.classification_ponderation = 0
         self.warm_up = warm_up
+        self.scale = scale
 
         self.train_seq, self.test_seq = self.train_test(self.model, gene_dataset_seq, train_size, test_size, seed)
-        self.train_fish, self.test_fish = self.train_test(self.model, gene_dataset_fish, train_size, test_size, seed)
+        self.train_fish, self.test_fish = self.train_test(self.model, gene_dataset_fish,
+                                                          train_size, test_size, seed, FishPosterior)
         self.test_seq.to_monitor = ['ll']
-        self.test_fish.to_monitor = ['ll_fish']
+        self.test_fish.to_monitor = ['ll']
 
-    @property
     def train(self, n_epochs=20, lr=1e-3, weight_decay=1e-6, params=None):
         self.adversarial_cls = Classifier(self.model.n_latent, n_labels=self.model.n_batch, n_layers=3)
         if self.use_cuda:
             self.adversarial_cls.cuda()
         self.optimizer_cls = torch.optim.Adam(filter(lambda p: p.requires_grad, self.adversarial_cls.parameters()),
-                                              lr=lr,
-                                              weight_decay=weight_decay)
+                                              lr=lr, weight_decay=weight_decay)
         super(TrainerFish, self).train(n_epochs=20, lr=1e-3, params=None)
 
+    @property
     def posteriors_loop(self):
         return ['train_seq', 'train_fish']
 

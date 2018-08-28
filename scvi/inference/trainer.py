@@ -189,7 +189,7 @@ class Trainer:
         else:
             object.__setattr__(self, name, value)
 
-    def train_test(self, model=None, gene_dataset=None, train_size=0.1, test_size=None, seed=0):
+    def train_test(self, model=None, gene_dataset=None, train_size=0.1, test_size=None, seed=0, type_class=Posterior):
         """
         :param train_size: float, int, or None (default is 0.1)
         :param test_size: float, int, or None (default is None)
@@ -204,15 +204,15 @@ class Trainer:
         indices_train = permutation[n_test:(n_test + n_train)]
 
         return (
-            self.create_posterior(model, gene_dataset, indices=indices_train),
-            self.create_posterior(model, gene_dataset, indices=indices_test)
+            self.create_posterior(model, gene_dataset, indices=indices_train, type_class=type_class),
+            self.create_posterior(model, gene_dataset, indices=indices_test, type_class=type_class)
         )
 
-    def create_posterior(self, model=None, gene_dataset=None, shuffle=False, indices=None):
+    def create_posterior(self, model=None, gene_dataset=None, shuffle=False, indices=None, type_class=Posterior):
         model = self.model if model is None and hasattr(self, "model") else model
         gene_dataset = self.gene_dataset if gene_dataset is None and hasattr(self, "model") else gene_dataset
-        return Posterior(model, gene_dataset, shuffle=shuffle, indices=indices, use_cuda=self.use_cuda,
-                         data_loader_kwargs=self.data_loader_kwargs)
+        return type_class(model, gene_dataset, shuffle=shuffle, indices=indices, use_cuda=self.use_cuda,
+                          data_loader_kwargs=self.data_loader_kwargs)
 
 
 class SequentialSubsetSampler(SubsetRandomSampler):
