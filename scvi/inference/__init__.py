@@ -1,9 +1,9 @@
 from .trainer import Trainer
 from .inference import (
     UnsupervisedTrainer,
-    TrainerFish,
     AdapterTrainer
 )
+from .fish import TrainerFish
 from .posterior import Posterior
 from .annotation import (
     JointSemiSupervisedTrainer,
@@ -11,7 +11,6 @@ from .annotation import (
     AlternateSemiSupervisedTrainer,
     ClassifierTrainer
 )
-from .experimental_inference import adversarial_wrapper
 
 
 __all__ = ['UnsupervisedTrainer',
@@ -19,7 +18,6 @@ __all__ = ['UnsupervisedTrainer',
            'Posterior',
            'TrainerFish',
            'AdapterTrainer',
-           'adversarial_wrapper',
            'JointSemiSupervisedTrainer',
            'SemiSupervisedTrainer',
            'AlternateSemiSupervisedTrainer',
