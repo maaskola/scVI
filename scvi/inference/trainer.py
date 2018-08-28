@@ -75,8 +75,8 @@ class Trainer:
         begin = time.time()
         with torch.set_grad_enabled(False):
             self.model.eval()
-            if self.frequency and (
-                            self.epoch == 0 or self.epoch == self.n_epochs or (self.epoch % self.frequency == 0)):
+            if self.frequency \
+                    and (self.epoch == 0 or self.epoch == self.n_epochs or (self.epoch % self.frequency == 0)):
                 if self.verbose:
                     print("\nEPOCH [%d/%d]: " % (self.epoch, self.n_epochs))
 
