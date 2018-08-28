@@ -2,8 +2,9 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 from scvi.dataset import CortexDataset
-from scvi.inference import UnsupervisedTrainer, TrainerFish, adversarial_wrapper
-from scvi.inference.posterior import proximity_imputation, compute_accuracy_nn
+from scvi.inference import UnsupervisedTrainer, TrainerFish
+from scvi.inference.posterior import proximity_imputation
+from scvi.inference.annotation import compute_accuracy_nn
 from scvi.models import VAE, VAEF
 
 

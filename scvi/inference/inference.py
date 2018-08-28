@@ -3,7 +3,7 @@ import copy
 import matplotlib.pyplot as plt
 import torch
 
-from scvi.inference import Trainer
+from . import Trainer
 
 plt.switch_backend('agg')
 
