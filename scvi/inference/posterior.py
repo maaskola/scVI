@@ -136,8 +136,10 @@ class Posterior:
         latent = []
         batch_indices = []
         labels = []
+        x_coords = []
+        y_coords = []
         for tensors in self:
-            sample_batch, local_l_mean, local_l_var, batch_index, label = tensors
+            sample_batch, local_l_mean, local_l_var, batch_index, label, x_coord, y_coord = tensors
             if not sample:
                 if self.model.log_variational:
                     sample_batch = torch.log(1 + sample_batch)
@@ -146,11 +148,13 @@ class Posterior:
                 latent += [self.model.sample_from_posterior_z(sample_batch)]
             batch_indices += [batch_index]
             labels += [label]
-        return np.array(torch.cat(latent)), np.array(torch.cat(batch_indices)), np.array(torch.cat(labels)).ravel()
+            x_coords += [x_coord]
+            y_coords += [y_coord]
+        return np.array(torch.cat(latent)), np.array(torch.cat(batch_indices)), np.array(torch.cat(labels)).ravel(), np.array(torch.cat(x_coords)), np.array(torch.cat(y_coords))
 
     def entropy_batch_mixing(self, verbose=False, **kwargs):
         if self.gene_dataset.n_batches == 2:
-            latent, batch_indices, labels = self.get_latent()
+            latent, batch_indices, labels, _, _ = self.get_latent()
             be_score = entropy_batch_mixing(latent, batch_indices, **kwargs)
             if verbose:
                 print("Entropy batch mixing :", be_score)
@@ -363,7 +367,7 @@ class Posterior:
         return original_list, imputed_list
 
     def knn_purity(self, verbose=False):
-        latent, _, labels = self.get_latent()
+        latent, _, labels, _, _ = self.get_latent()
         score = knn_purity(latent, labels)
         if verbose:
             print("KNN purity score :", score)
@@ -373,7 +377,7 @@ class Posterior:
 
     def clustering_scores(self, verbose=True, prediction_algorithm='knn'):
         if self.gene_dataset.n_labels > 1:
-            latent, _, labels = self.get_latent()
+            latent, _, labels, _, _ = self.get_latent()
             if prediction_algorithm == 'knn':
                 labels_pred = KMeans(self.gene_dataset.n_labels, n_init=200).fit_predict(latent)  # n_jobs>1 ?
             elif prediction_algorithm == 'gmm':
@@ -397,7 +401,7 @@ class Posterior:
         graph and the Spearman correlation of the adjacency matrices.
         '''
         if hasattr(self.gene_dataset, 'adt_expression_clr'):
-            latent, _, _ = self.sequential().get_latent()
+            latent, _, _, _, _ = self.sequential().get_latent()
             protein_data = self.gene_dataset.adt_expression_clr[self.indices]
             spearman_correlation, fold_enrichment = nn_overlap(latent, protein_data, **kwargs)
             if verbose:
@@ -409,7 +413,7 @@ class Posterior:
                    labels=None, n_batch=None):
         # If no latent representation is given
         if latent is None:
-            latent, batch_indices, labels = self.get_latent(sample=True)
+            latent, batch_indices, labels, _, _ = self.get_latent(sample=True)
             latent, idx_t_sne = self.apply_t_sne(latent, n_samples)
             batch_indices = batch_indices[idx_t_sne].ravel()
             labels = labels[idx_t_sne].ravel()

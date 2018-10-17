@@ -142,8 +142,9 @@ class GeneExpressionDataset(Dataset):
     def update_cells(self, subset_cells):
         new_n_cells = len(subset_cells) if subset_cells.dtype is not np.dtype('bool') else subset_cells.sum()
         print("Downsampling from %i to %i cells" % (len(self), new_n_cells))
-        for attr_name in ['_X', 'labels', 'batch_indices', 'local_means', 'local_vars']:
-            setattr(self, attr_name, getattr(self, attr_name)[subset_cells])
+        for attr_name in ['_X', 'labels', 'batch_indices', 'local_means', 'local_vars', 'x_coord', 'y_coord']:
+            if hasattr(self, attr_name) and getattr(self, attr_name) is not None:
+                setattr(self, attr_name, getattr(self, attr_name)[subset_cells])
         self.library_size_batch()
 
     def subsample_genes(self, new_n_genes=None, subset_genes=None):
@@ -372,18 +373,23 @@ class GeneExpressionDataset(Dataset):
                 labels = np.concatenate([gene_dataset.labels for gene_dataset in gene_datasets])
         else:
             labels = np.zeros((X.shape[0], 1))
+            x_coord = np.zeros((X.shape[0], 1))
+            y_coord = np.zeros((X.shape[0], 1))
             n_labels_offset = 0
             current_index = 0
             for gene_dataset in gene_datasets:
                 next_index = current_index + len(gene_dataset)
                 labels[current_index:next_index] = gene_dataset.labels + n_labels_offset
+                x_coord[current_index:next_index] = gene_dataset.x_coord
+                y_coord[current_index:next_index] = gene_dataset.y_coord
                 n_labels_offset += gene_dataset.n_labels
                 current_index = next_index
 
         local_means = np.concatenate([gene_dataset.local_means for gene_dataset in gene_datasets])
         local_vars = np.concatenate([gene_dataset.local_vars for gene_dataset in gene_datasets])
         result = GeneExpressionDataset(X, local_means, local_vars, batch_indices, labels,
-                                       gene_names=gene_names_ref, cell_types=cell_types)
+                                       gene_names=gene_names_ref, cell_types=cell_types,
+                                       x_coord=x_coord, y_coord=y_coord)
         result.barcodes = [gene_dataset.barcodes if hasattr(gene_dataset, 'barcodes') else None
                            for gene_dataset in gene_datasets]
         return result

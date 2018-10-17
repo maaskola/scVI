@@ -37,29 +37,33 @@ class CsvDataset(GeneExpressionDataset):
         self.sep = sep
         self.gene_by_cell = gene_by_cell  # Whether the original dataset is genes by cells
 
-        data, gene_names = self.download_and_preprocess()
+        data, gene_names, x_coord, y_coord = self.preprocess()
 
         super(CsvDataset, self).__init__(
             *GeneExpressionDataset.get_attributes_from_matrix(
-                data), gene_names=gene_names)
+                data), gene_names=gene_names, x_coord=x_coord, y_coord=y_coord)
 
         self.subsample_genes(new_n_genes, subset_genes)
 
     def preprocess(self):
         print("Preprocessing dataset")
 
+        path = self.download_name
+        data = pd.read_csv(path, sep=self.sep, index_col=0,
+                compression=self.compression)
         if self.gene_by_cell:
-            data = pd.read_csv(self.save_path + self.download_name,
-                               sep=self.sep, index_col=0, compression=self.compression).T
-        else:
-            data = pd.read_csv(self.save_path + self.download_name,
-                               sep=self.sep, index_col=0, compression=self.compression)
+            data = data.T
 
         gene_names = np.array(data.columns, dtype=str)
+        spot_names = list(data.index)
+
+        coords = np.array([[float(x) for x in spot_name.split("x")] for spot_name in spot_names])
+        x_coord = np.reshape(coords[:, 0], (-1, 1))
+        y_coord = np.reshape(coords[:, 1], (-1, 1))
 
         data = data.values
         print("Finished preprocessing dataset")
-        return data, gene_names
+        return data, gene_names, x_coord, y_coord
 
 
 class BreastCancerDataset(CsvDataset):

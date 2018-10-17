@@ -41,7 +41,10 @@ class UnsupervisedTrainer(Trainer):
         return ['train_set']
 
     def loss(self, tensors):
-        sample_batch, local_l_mean, local_l_var, batch_index, _ = tensors
+        if len(tensors) == 7: # depending on whether or not we have spatial coordinates
+            sample_batch, local_l_mean, local_l_var, batch_index, _, _, _ = tensors
+        else:
+            sample_batch, local_l_mean, local_l_var, batch_index, _ = tensors
         reconst_loss, kl_divergence = self.model(sample_batch, local_l_mean, local_l_var, batch_index)
         loss = torch.mean(reconst_loss + self.kl_weight * kl_divergence)
         return loss
