@@ -71,8 +71,8 @@ class BreastCancerDataset(CsvDataset):
 
 
 class MouseOBDataset(CsvDataset):
-    def __init__(self, save_path='data/'):
-        super(MouseOBDataset, self).__init__("Rep11_MOB_count_matrix-1.tsv", save_path=save_path,
-                                             url="http://www.spatialtranscriptomicsresearch.org/wp-content/uploads/"
-                                                 "2016/07/Rep11_MOB_count_matrix-1.tsv",
-                                             sep='\t', gene_by_cell=False)
+    def __init__(self, save_path='data/', index=11, new_n_genes=600):
+        super(MouseOBDataset, self).__init__(f"Rep{index}_MOB_count_matrix-1.tsv", save_path=save_path,
+                                             url="http://www.spatialtranscriptomicsresearch.org/wp-content/uploads/" +
+                                                 f"2016/07/Rep{index}_MOB_count_matrix-1.tsv",
+                                             sep='\t', gene_by_cell=False, new_n_genes=new_n_genes)
