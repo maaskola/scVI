@@ -274,7 +274,7 @@ class GeneExpressionDataset(Dataset):
         return local_mean, local_var
 
     @staticmethod
-    def get_attributes_from_matrix(X, batch_indices=0, labels=None):
+    def get_attributes_from_matrix(X, batch_indices=0, labels=None, x_coord=None, y_coord=None):
         to_keep = np.array((X.sum(axis=1) > 0)).ravel()
         if X.shape != X[to_keep].shape:
             removed_idx = []
@@ -284,12 +284,18 @@ class GeneExpressionDataset(Dataset):
             print("Cells with zero expression in all genes considered were removed, the indices of the removed cells "
                   "in the expression matrix were:")
             print(removed_idx)
+            print("from there")
         X = X[to_keep]
         local_mean, local_var = GeneExpressionDataset.library_size(X)
         batch_indices = batch_indices * np.ones((X.shape[0], 1)) if type(batch_indices) is int \
             else batch_indices[to_keep]
         labels = labels[to_keep].reshape(-1, 1) if labels is not None else np.zeros_like(batch_indices)
-        return X, local_mean, local_var, batch_indices, labels
+        x_coord = x_coord[to_keep].reshape(-1, 1) if x_coord is not None else np.zeros_like(batch_indices)
+        y_coord = y_coord[to_keep].reshape(-1, 1) if y_coord is not None else np.zeros_like(batch_indices)
+        if x_coord is not None:
+            return X, local_mean, local_var, batch_indices, labels, x_coord, y_coord
+        else:
+            return X, local_mean, local_var, batch_indices, labels
 
     @staticmethod
     def get_attributes_from_list(Xs, list_batches=None, list_labels=None):

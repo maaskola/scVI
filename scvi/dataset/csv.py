@@ -39,9 +39,12 @@ class CsvDataset(GeneExpressionDataset):
 
         data, gene_names, x_coord, y_coord = self.preprocess()
 
-        super(CsvDataset, self).__init__(
-            *GeneExpressionDataset.get_attributes_from_matrix(
-                data), gene_names=gene_names, x_coord=x_coord, y_coord=y_coord)
+        data, local_means, local_vars, batch_indices, labels, x_coord, y_coord = GeneExpressionDataset.get_attributes_from_matrix(
+                data, x_coord=x_coord, y_coord=y_coord)
+        super(CsvDataset, self).__init__(X=data, local_means=local_means,
+                local_vars=local_vars, batch_indices=batch_indices,
+                labels=labels, x_coord=x_coord, y_coord=y_coord,
+                gene_names=gene_names)
 
         self.subsample_genes(new_n_genes, subset_genes)
 
